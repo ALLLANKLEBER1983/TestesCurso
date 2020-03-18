@@ -7,13 +7,16 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.internal.runners.statements.ExpectException;
@@ -46,7 +49,9 @@ public class LocacaoServiceTestes {
 	
 	
 	@Test
-	public  void testeLocadora() throws Exception {
+	public  void deveAlugarFilme() throws Exception {
+		
+		Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(),Calendar.SATURDAY));
 		//cenario
 		
 		Usuario usuario = new Usuario("Usuario 1");
@@ -56,13 +61,13 @@ public class LocacaoServiceTestes {
 		Locacao locacao = service.alugarFilme(usuario,filmes);
 		
 		//verificacao
-		error.checkThat(locacao.getValor(), CoreMatchers.is(0.0));
+		error.checkThat(locacao.getValor(), CoreMatchers.is(5.0));
 		error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(), new Date()), CoreMatchers.is(true));
 		error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(), new Date()), CoreMatchers.is(false));
 	}
 	
 	@Test(expected = FilmesSemEtoqueException.class)
-	public void testeLocacao_filmeSemEstoque() throws Exception {
+	public void deveLancarExcecaoAoAlugarFilmeSemEstoque() throws Exception {
 		//cenario
 				
 				Usuario usuario = new Usuario("Usuario 1");
@@ -75,7 +80,7 @@ public class LocacaoServiceTestes {
 	}
 	
 	@Test
-	public void testeLocadora_UsuarioVazio() throws FilmesSemEtoqueException {
+	public void naoDeveAlugarFilmeSemUsuario() throws FilmesSemEtoqueException {
 		//cenario
 		
 		List <Filme> filmes = Arrays.asList(new Filme("Filme 1", 1, 5.0));
@@ -92,7 +97,7 @@ public class LocacaoServiceTestes {
 	}
 	
 	@Test
-	public void testeLocacao_FilmeVazio() throws FilmesSemEtoqueException, LocadoraException {
+	public void NaoDeveAlugarFilmeSemFilme() throws FilmesSemEtoqueException, LocadoraException {
 		//cenario
 		
 		Usuario usuario = new Usuario("Usuario 1");
@@ -105,6 +110,58 @@ public class LocacaoServiceTestes {
 		
 		
 		
+	}
+	
+	@Test 
+	public void devePagar75PcNoFilme3() throws FilmesSemEtoqueException, LocadoraException {
+		
+		Usuario usuario = new Usuario();
+		List<Filme>filmes = Arrays.asList(new Filme("Filme 1",2,4.0),new Filme("Filme 2",2,4.0),new Filme("Filme 3",2,4.0));
+		
+		Locacao resultado = service.alugarFilme(usuario, filmes);
+		
+		assertThat(resultado.getValor(),is(11.0));
+		
+	}
+	
+	@Test 
+	public void devePagar50PcNoFilme4() throws FilmesSemEtoqueException, LocadoraException {
+		
+		Usuario usuario = new Usuario();
+		List<Filme>filmes = Arrays.asList(new Filme("Filme 1",2,4.0),new Filme("Filme 2",2,4.0),
+				new Filme("Filme 3",2,4.0),new Filme("Filme 4",2,4.0));
+		
+		Locacao resultado = service.alugarFilme(usuario, filmes);
+		
+		assertThat(resultado.getValor(),is(13.0));
+		
+	}
+	
+	@Test 
+	public void devePagar0PcNoFilme6() throws FilmesSemEtoqueException, LocadoraException {
+		
+		Usuario usuario = new Usuario();
+		List<Filme>filmes = Arrays.asList(new Filme("Filme 1",2,4.0),new Filme("Filme 2",2,4.0),
+				new Filme("Filme 3",2,4.0),new Filme("Filme 4",2,4.0),
+				new Filme("Filme 5",2,4.0),new Filme("Filme 6",2,4.0));
+		
+		Locacao resultado = service.alugarFilme(usuario, filmes);
+		
+		assertThat(resultado.getValor(),is(14.0));
+		
+	}
+	
+	@Test
+	public void naoDeveDevolverFilmeNoDomingo() throws FilmesSemEtoqueException, LocadoraException {
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(),Calendar.SATURDAY));
+		Usuario usuario = new Usuario();
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1",1,5.0));
+		
+		Locacao retorno = service.alugarFilme(usuario, filmes);
+		
+		Boolean ehSegunda = DataUtils.verificarDiaSemana(retorno.getDataRetorno(),Calendar.MONDAY);
+		
+		Assert.assertTrue(ehSegunda);
 	}
 	
 
