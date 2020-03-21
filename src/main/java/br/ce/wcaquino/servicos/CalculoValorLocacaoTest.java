@@ -31,6 +31,9 @@ public class CalculoValorLocacaoTest {
 	@Parameter(value = 1)
 	public Double valorLocacao;
 	
+	@Parameter(value = 2)
+	public String cenario;
+	
 	@Before
 	public  void setup() {
 		service = new LocacaoService();
@@ -44,13 +47,13 @@ public class CalculoValorLocacaoTest {
 	private static Filme filme5 = new Filme("Filme 5",2,4.0);
 	private static Filme filme6 = new Filme("Filme 6",2,4.0);
 	
-	@Parameters
-	private static Collection<Object[]> getParametros(){
+	@Parameters(name = "{2}")
+	public static Collection<Object[]> getParametros(){
 		return Arrays.asList(new Object[][]{
-		{Arrays.asList(filme1,filme2,filme3),11.0},
-		{Arrays.asList(filme1,filme2,filme3,filme4),13.0},
-		{Arrays.asList(filme1,filme2,filme3,filme4,filme5),14.0},
-		{Arrays.asList(filme1,filme2,filme3,filme4,filme5,filme6),14.0}
+		{Arrays.asList(filme1,filme2,filme3),11.0,"terceiro filme 25%"},
+		{Arrays.asList(filme1,filme2,filme3,filme4),13.0,"quarto filme 50%"},
+		{Arrays.asList(filme1,filme2,filme3,filme4,filme5),14.0,"quinto filme 75%"},
+		{Arrays.asList(filme1,filme2,filme3,filme4,filme5,filme6),14.0,"sexto filme 100%"}
 			});
 		
 	}
@@ -65,6 +68,11 @@ public class CalculoValorLocacaoTest {
 		
 		assertThat(resultado.getValor(),is(valorLocacao));
 		
+	}
+	
+	@Test
+	public void print() {
+		System.out.println(valorLocacao);
 	}
 
 }
