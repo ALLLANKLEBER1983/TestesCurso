@@ -28,6 +28,8 @@ import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmesSemEtoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
+import br.ce.wcaquino.matchers.DiaSemanaMatcher;
+import br.ce.wcaquino.matchers.MatchersProprios;
 import br.ce.wcaquino.servicos.LocacaoService;
 import br.ce.wcaquino.utils.DataUtils;
 
@@ -51,7 +53,7 @@ public class LocacaoServiceTestes {
 	@Test
 	public  void deveAlugarFilme() throws Exception {
 		
-		Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(),Calendar.SATURDAY));
+		//Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(),Calendar.SATURDAY));
 		//cenario
 		
 		Usuario usuario = new Usuario("Usuario 1");
@@ -63,7 +65,7 @@ public class LocacaoServiceTestes {
 		//verificacao
 		error.checkThat(locacao.getValor(), CoreMatchers.is(5.0));
 		error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(), new Date()), CoreMatchers.is(true));
-		error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(), new Date()), CoreMatchers.is(false));
+		error.checkThat(locacao.getDataRetorno(),MatchersProprios.ehHojeComDiferencaDeDias(1));
 	}
 	
 	@Test(expected = FilmesSemEtoqueException.class)
@@ -124,6 +126,9 @@ public class LocacaoServiceTestes {
 		Boolean ehSegunda = DataUtils.verificarDiaSemana(retorno.getDataRetorno(),Calendar.MONDAY);
 		
 		Assert.assertTrue(ehSegunda);
+		
+		//assertThat(retorno.getDataRetorno(),new DiaSemanaMatcher(Calendar.MONDAY));
+		assertThat(retorno.getDataRetorno(), MatchersProprios.caiEm(Calendar.MONDAY));
 	}
 	
 
